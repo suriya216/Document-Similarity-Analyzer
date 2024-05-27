@@ -1,0 +1,28 @@
+#heading{
+  text-align: center;
+  font-size: 30px;
+  color: rgb(255, 38, 0);
+}
+
+#drop_zone{
+  margin-right:40px;
+  width: 340px;
+  height: 340px;
+  color:rgb(120,120,120);
+  border: 4px dashed #5bc0de;
+  padding: 3rem;
+  line-height: 140%;
+  font-size: 2.6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+   text-align: center;
+}
+
+#container{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+   text-align: center;
+}

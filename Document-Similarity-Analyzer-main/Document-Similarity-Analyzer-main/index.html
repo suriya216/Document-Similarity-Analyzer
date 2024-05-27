@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document Analyzer Page</title>
+    <style>
+      #heading {
+        text-align: center;
+        font-size: 30px;
+        color: rgb(255, 38, 0);
+      }
+
+      progress[value] {
+        --color: linear-gradient(#fff8, #fff0),
+          repeating-linear-gradient(135deg, #0003 0 10px, #0000 0 20px), #3141f7;
+        --background: lightgrey;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border: none;
+        width: 300px;
+        height: 25px;
+        margin: 0 10px;
+        border-radius: 10em;
+        background: var(--background);
+      }
+      progress[value]::-webkit-progress-bar {
+        border-radius: 10em;
+        background: var(--background);
+      }
+      progress[value]::-webkit-progress-value {
+        border-radius: 10em;
+        background: var(--color);
+      }
+      progress[value]::-moz-progress-bar {
+        border-radius: 10em;
+        animation: progress 2s 0.5s forwards;
+        background: var(--color);
+      }
+
+      #drop_zone1 {
+        margin-right: 40px;
+        width: 340px;
+        height: 300px;
+        color: rgb(120, 120, 120);
+        border: 4px dashed #5bc0de;
+        padding: 3rem;
+        background: #e0eafc;
+        line-height: 120%;
+        font-size: 2.6rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        flex-direction: column;
+      }
+
+      #drop_zone2 {
+        margin-right: 40px;
+        width: 340px;
+        height: 300px;
+        color: rgb(120, 120, 120);
+        border: 4px dashed #5bc0de;
+        padding: 3rem;
+        background: #e0eafc;
+        line-height: 120%;
+        font-size: 2.6rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        flex-direction: column;
+      }
+
+      #containeer {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #result {
+        align-content: center;
+        text-align: center;
+      }
+      #submit {
+        padding: 20px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+
+        align-items: center;
+      }
+      button {
+        border-radius: 30px;
+        background-color: blue;
+        border: none;
+        width: 120px;
+        font-size: 20px;
+        height: 40px;
+      }
+
+      #drop_zone1.dragover {
+        border-color: #4cae4c;
+        background-color: #dff0d8;
+      }
+
+      #drop_zone2.dragover {
+        border-color: #4cae4c;
+        background-color: #dff0d8;
+      }
+      .file-name {
+        font-size: 14px;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="heading">
+      <h1>Document Similarity Analyzer</h1>
+    </div>
+    <div id="inputDiv">
+      <div id="containeer">
+        <div
+          id="drop_zone1"
+          ondrop="handleDrop(event, 'file1')"
+          ondragover="handleDragOver(event, 'drop_zone1')"
+          ondragleave="handleDragLeave(event, 'drop_zone1')"
+          onclick="fileInputClick('file1')"
+        >
+          <p>Click or Drag & Drop to Upload</p>
+          <input
+            type="file"
+            name="file1"
+            id="file1"
+            style="display: none"
+            required
+          />
+          <span class="file-name" id="file1-name"></span>
+        </div>
+
+        <div
+          id="drop_zone2"
+          ondrop="handleDrop(event, 'file2')"
+          ondragover="handleDragOver(event, 'drop_zone2')"
+          ondragleave="handleDragLeave(event, 'drop_zone2')"
+          onclick="fileInputClick('file2')"
+        >
+          <p>Click or Drag & Drop to Upload</p>
+          <input
+            type="file"
+            name="file2"
+            id="file2"
+            style="display: none"
+            required
+          />
+          <span class="file-name" id="file2-name"></span>
+        </div>
+      </div>
+      <div id="submit">
+        <button onclick="compareFiles()">Check</button>
+      </div>
+    </div>
+
+    <div id="loading" style="text-align: center">
+      <img src="assets/Double Ring-1s-200px.gif" alt="Loading..." />
+    </div>
+
+    <div id="result"></div>
+    <script>
+      var inputDiv = document.getElementById("inputDiv");
+      var loading = document.getElementById("loading");
+      var res = document.getElementById("result");
+      loading.style.display = "none";
+
+      function compareFiles() {
+        const fileInput1 = document.getElementById("file1");
+        const fileInput2 = document.getElementById("file2");
+        const resultDiv = document.getElementById("result");
+
+        const file1 = fileInput1.files[0];
+        const file2 = fileInput2.files[0];
+
+        if (!file1 || !file2) {
+          alert("Please select both files.");
+          return;
+        }
+
+        const reader1 = new FileReader();
+        const reader2 = new FileReader();
+
+        reader1.onload = function () {
+          reader2.onload = function () {
+            const content1 = reader1.result;
+            const content2 = reader2.result;
+            const similarityScore = calculateSimilarity(content1, content2);
+            inputDiv.style.display = "none";
+            loading.style.display = "block";
+            setTimeout(function () {
+              loading.style.display = "none";
+              resultDiv.innerHTML = `</p><progress id="file" max="100" value="${similarityScore}"></progress> <br>
+        <p style="font-size:25px">Similarity Score: ${Math.round(
+          similarityScore
+        )}%`;
+            }, 3000);
+          };
+
+          reader2.readAsText(file2);
+        };
+
+        reader1.readAsText(file1);
+      }
+
+      function calculateSimilarity(str1, str2) {
+        const longer = str1.length > str2.length ? str1 : str2;
+        const shorter = str1.length > str2.length ? str2 : str1;
+
+        const longerLength = longer.length;
+
+        if (longerLength === 0) {
+          return 100.0;
+        }
+
+        const distance = levenshteinDistance(longer, shorter);
+        return ((longerLength - distance) / longerLength) * 100;
+      }
+
+      function levenshteinDistance(str1, str2) {
+        const matrix = [];
+
+        for (let i = 0; i <= str2.length; i++) {
+          matrix[i] = [i];
+        }
+
+        for (let j = 0; j <= str1.length; j++) {
+          matrix[0][j] = j;
+        }
+
+        for (let i = 1; i <= str2.length; i++) {
+          for (let j = 1; j <= str1.length; j++) {
+            if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+              matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+              matrix[i][j] = Math.min(
+                matrix[i - 1][j - 1] + 1,
+                matrix[i][j - 1] + 1,
+                matrix[i - 1][j] + 1
+              );
+            }
+          }
+        }
+
+        return matrix[str2.length][str1.length];
+      }
+
+      function handleDragOver(event, dropZoneId) {
+        event.preventDefault();
+        var dropZone = document.getElementById(dropZoneId);
+        dropZone.classList.add("dragover");
+      }
+
+      function handleDragLeave(event, dropZoneId) {
+        event.preventDefault();
+        var dropZone = document.getElementById(dropZoneId);
+        dropZone.classList.remove("dragover");
+      }
+
+      function handleDrop(event, fileId) {
+        event.preventDefault();
+        var dropZoneId = fileId === "file1" ? "drop_zone1" : "drop_zone2";
+        var dropZone = document.getElementById(dropZoneId);
+        dropZone.classList.remove("dragover");
+
+        var files = event.dataTransfer.files;
+        var fileInput = document.getElementById(fileId);
+        fileInput.files = files;
+
+        var fileNameSpan = document.getElementById(fileId + "-name");
+        fileNameSpan.textContent = files[0].name;
+      }
+      function fileInputClick(fileId) {
+        var fileInput = document.getElementById(fileId);
+        fileInput.click();
+        document.getElementById(fileId).click();
+
+        fileInput.addEventListener("change", function () {
+          var fileNameSpan = document.getElementById(fileId + "-name");
+          fileNameSpan.textContent = fileInput.files[0].name;
+        });
+      }
+    </script>
+  </body>
+</html>
